@@ -1,6 +1,6 @@
 import React from 'react';
 import { assets } from '../assets/assets';
-
+import {useNavigate} from 'react-router-dom'
 const Banner = () => {
   const navigate = useNavigate()
   return (
@@ -9,7 +9,7 @@ const Banner = () => {
         <h1 className='text-white text-3xl sm:text-4xl font-semibold leading-snug'>
           Book Appointment <br /> With 100+ Trusted Doctors
         </h1>
-        <button onClick={()=>navigate()} className='bg-white text-sm sm:text-base text-gray-600 px-8 py-3 rounded-full mt-6 hover:scale-105 transition-transform'>
+        <button onClick={()=>{navigate('/login'); scrollTo(0,0)} }className='bg-white text-sm sm:text-base text-gray-600 px-8 py-3 rounded-full mt-6 hover:scale-105 transition-transform'>
           Create account
         </button>
       </div>
