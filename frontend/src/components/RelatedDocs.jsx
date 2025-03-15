@@ -19,7 +19,7 @@ const RelatedDocs = ({speciality,docId}) => {
       <h1 className="text-3xl font-medium">Top Doctors to Book</h1>
       <p className="sm:w-1/3 text-center text-sm">
         Simply browse through our extensive list of trusted doctors.
-      </p>
+      </p> 
 
       {/* Updated Grid for Responsive Layout */}
       <div className="w-full grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6 pt-5 px-3 sm:px-0">
