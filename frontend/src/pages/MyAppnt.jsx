@@ -33,7 +33,7 @@ const MyAppnt = () => {
                   Cancel Appointment
                 </button>
               </div>
-            </div>
+            </div>  
           </div>
         ))}
       </div>
