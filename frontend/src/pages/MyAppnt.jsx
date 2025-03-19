@@ -35,7 +35,7 @@ const MyAppnt = () => {
               </div>
             </div>  
           </div>
-        ))}
+        ))} 
       </div>
     </div>
   );
