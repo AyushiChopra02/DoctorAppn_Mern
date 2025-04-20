@@ -6,7 +6,7 @@ import RelatedDocs from '../components/RelatedDocs';
 
 const Appointmnt = () => {
   const { docId } = useParams();
-  const { doctors, currencySymbol } = useContext(AppContext);
+  const { doctors, currencySymbol , backendUrl, token , getDoctorData } = useContext(AppContext);
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const [docInfo, setDocInfo] = useState(null);
@@ -52,6 +52,9 @@ const Appointmnt = () => {
       setDocSlots((prev) => [...prev, timeSlots]);
     }
   };
+
+
+  con
 
   useEffect(() => {
     fetchDocInfo();
