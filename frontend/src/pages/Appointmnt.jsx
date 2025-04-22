@@ -1,13 +1,16 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import { assets } from '../assets/assets';
 import RelatedDocs from '../components/RelatedDocs';
+import { toast } from 'react-toastify';
 
 const Appointmnt = () => {
   const { docId } = useParams();
-  const { doctors, currencySymbol , backendUrl, token , getDoctorData } = useContext(AppContext);
+  const { doctors, currencySymbol, backendUrl, token, getDoctorData } = useContext(AppContext);
   const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  const navigate = useNavigate();
 
   const [docInfo, setDocInfo] = useState(null);
   const [docSlots, setDocSlots] = useState([]);
@@ -53,8 +56,52 @@ const Appointmnt = () => {
     }
   };
 
+  const bookAppointment = async () => {
+    if (!token) {
+      toast.warn('Login to book appointment');
+      return navigate('/login');
+    }
 
-  con
+    if (!slotTime) {
+      toast.warn('Please select a time slot');
+      return;
+    }
+
+    try {
+      const date = docSlots[slotIndex][0].datetime;
+      const day = date.getDate();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      const slotDate = `${day}_${month}_${year}`;
+
+      const response = await fetch(`${backendUrl}/api/book-appointment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        body: JSON.stringify({
+          doctorId: docId,
+          slotDate,
+          slotTime,
+          amount: docInfo.fees,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message || 'Appointment booked successfully');
+        getDoctorData();
+        navigate('/appointments');
+      } else {
+        toast.error(data.message || 'Failed to book appointment');
+      }
+    } catch (error) {
+      console.error('Booking Error:', error);
+      toast.error('Something went wrong while booking');
+    }
+  };
 
   useEffect(() => {
     fetchDocInfo();
@@ -64,51 +111,49 @@ const Appointmnt = () => {
     if (docInfo) getAvailableSlots();
   }, [docInfo]);
 
-  useEffect(() => {
-    console.log(docSlots);
-  }, [docSlots]);
-
   return (
     docInfo && (
       <div>
         {/* Doctor Info Section */}
-        <div className='flex flex-col sm:flex-row gap-4'>
+        <div className="flex flex-col sm:flex-row gap-4">
           <div>
-            <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt={docInfo.name} />
+            <img className="bg-primary w-full sm:max-w-72 rounded-lg" src={docInfo.image} alt={docInfo.name} />
           </div>
 
-          <div className='flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0'>
-            <p className='flex items-center gap-2 text-2xl font-medium text-gray-900'>
+          <div className="flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0">
+            <p className="flex items-center gap-2 text-2xl font-medium text-gray-900">
               {docInfo.name}
-              <img className='w-5' src={assets.verified_icon} alt='Verified' />
+              <img className="w-5" src={assets.verified_icon} alt="Verified" />
             </p>
 
-            <div className='flex items-center gap-2 text-sm text-gray-600'>
+            <div className="flex items-center gap-2 text-sm text-gray-600">
               <p>
                 {docInfo.degree} - {docInfo.speciality}
               </p>
-              <button className='py-0.5 px-2 border text-xs rounded-full'>
-                {docInfo.experience} years
-              </button>
+              <button className="py-0.5 px-2 border text-xs rounded-full">{docInfo.experience} years</button>
             </div>
 
             <div>
-              <p className='flex items-center gap-1 text-sm font-medium text-gray-900 mt-3'>
-                About <img src={assets.info_icon} alt='Info' />
+              <p className="flex items-center gap-1 text-sm font-medium text-gray-900 mt-3">
+                About <img src={assets.info_icon} alt="Info" />
               </p>
-              <p className='text-sm text-gray-500 max-w-[700px] mt-1'>{docInfo.about}</p>
+              <p className="text-sm text-gray-500 max-w-[700px] mt-1">{docInfo.about}</p>
             </div>
 
-            <p className='text-gray-500 font-medium mt-4'>
-              Appointment fee: <span className='text-gray-600'>{currencySymbol}{docInfo.fees}</span>
+            <p className="text-gray-500 font-medium mt-4">
+              Appointment fee:{' '}
+              <span className="text-gray-600">
+                {currencySymbol}
+                {docInfo.fees}
+              </span>
             </p>
           </div>
         </div>
 
         {/* Booking Slots Section */}
-        <div className='sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700'>
+        <div className="sm:ml-72 sm:pl-4 mt-4 font-medium text-gray-700">
           <p>Booking slots</p>
-          <div className='flex gap-4 items-center w-full overflow-x-scroll mt-4'>
+          <div className="flex gap-4 items-center w-full overflow-x-scroll mt-4">
             {docSlots.length > 0 &&
               docSlots.map((item, index) => (
                 <div
@@ -125,26 +170,32 @@ const Appointmnt = () => {
           </div>
 
           {/* Time Slots Section */}
-          <div className='flex items-center gap-3 w-full overflow-x-scroll mt-4'>
+          <div className="flex items-center gap-3 w-full overflow-x-scroll mt-4">
             {docSlots.length > 0 &&
               docSlots[slotIndex].map((item, index) => (
                 <p
                   key={index}
                   onClick={() => setSlotTime(item.time)}
                   className={`text-sm font-light flex-shrink-0 px-5 py-2 rounded-full cursor-pointer ${
-                    item.time === slotTime ? 'bg-blue-400 text-white' : 'text-gray-400 border border-gray-300'
+                    item.time === slotTime
+                      ? 'bg-blue-400 text-white'
+                      : 'text-gray-400 border border-gray-300'
                   }`}
                 >
                   {item.time.toLowerCase()}
                 </p>
               ))}
           </div>
-          <button className='bg-blue-500 text-white text-sm font-light px-14 py-3 rounded-full my-6'>Book an appointment</button>
+
+          <button
+            onClick={bookAppointment}
+            className="bg-blue-500 text-white text-sm font-light px-14 py-3 rounded-full my-6"
+          >
+            Book an appointment
+          </button>
         </div>
-<RelatedDocs docId={docId} speciality={docInfo.speciality} />
 
-
-
+        <RelatedDocs docId={docId} speciality={docInfo.speciality} />
       </div>
     )
   );
