@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 
 const authAdmin = (req, res, next) => {
   try{
-
+  
 const atoken = req.headers["authorization"]
 if(!atoken){
     return res.json({success:false,message:"Token not found"})
