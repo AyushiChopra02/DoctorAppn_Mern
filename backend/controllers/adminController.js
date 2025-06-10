@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
 import Doctor from '../models/doctorModel.js';
 import jwt from 'jsonwebtoken';
-
+ 
 // ✅ API to add doctor
 const addDoctor = async (req, res) => {
   try {
